@@ -24,7 +24,7 @@
     </div>
     {{#if carInfo}}
       <div>
-          {{elem name='car' innerBlock='b-car-info' }}
+          {{elem name='car' innerBlock='b-car-info' data=carInfo }}
       </div>
     {{/if}}
 {{/block}}
