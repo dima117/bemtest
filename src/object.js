@@ -42,17 +42,3 @@ var XObject = function(options) {
 };
 
 XObject.extend = helpers.extend;
-
-
-var myObjType =  XObject.extend({
-    text: 'moo',
-    say: function() { console.log(this.text); }
-});
-
-var myObjType2 =  myObjType.extend({
-    say2: function() { console.log(222); }
-});
-
-var instance = new myObjType2();
-instance.say();
-instance.say2();
