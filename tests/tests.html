@@ -8,12 +8,20 @@
     <body>
         <div id="mocha"></div>
         <script src="../lib/mocha.js"></script>
-
-        <script></script>
-        <script src="../object.js"></script>
-        <script src="test.object.js"></script>
+        <script src="../lib/chai.js"></script>
         <script>
             mocha.setup('bdd');
+            expect = chai.expect;
+        </script>
+
+        <script></script>
+        <script src="../src/object.js"></script>
+        <script src="../src/hash.js"></script>
+        <script src="../src/model.js"></script>
+        <script src="object.js"></script>
+        <script src="model.js"></script>
+        <script src="hash.js"></script>
+        <script>
             mocha.run();
         </script>
     </body>

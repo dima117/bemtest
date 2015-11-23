@@ -1,55 +1,71 @@
-var model = XObject.extend({
-    _data: {},
+(function(lib){
 
-    _getField: function(name) {
-        return this._data[name] || {};
-    },
+    var XModel = lib.model = lib.object.extend({
+        _data: {},
 
-    _prepareValue: function(obj){
+        _getField: function(name) {
+            return this._data[name] || {};
+        },
 
-    },
+        _prepareValue: function(obj){
+            var model, name;
 
-    _calculateObjectHash: function(obj) {
+            if (typeof obj === 'object' && obj && !(obj instanceof XModel)) {
+                model = new XModel();
 
-    },
-
-    get: function(name){
-        return _getField(name).value;
-    },
-    set: function(name, value) {
-        var field = this._getField(name),
-            obj = this._prepareValue(value),
-            hash = this._calculateObjectHash(obj);
-
-        if (hash !== field.hash) {
-            if (obj instanceof model && field.value instanceof model) {
-
-                field.value.names().forEach(function(name) {
-                    if (!obj.hasField(name)) {
-                        field.value.delete(name);
-                    }
-                });
-
-                obj.names().forEach(function(name) {
-                    field.value.set(name, obj.get(name));
-                }, this);
-
-                field.hash = hash;
+                for (name in obj) {
+                    model.set(name, obj[name]);
+                }
             } else {
-                this._data[name] = {
-                    value: obj,
-                    hash: hash
-                };
+                return obj;
             }
+        },
+
+        getHashSourceString: function() {
+            return this.names().sort().map(function(name) {
+                return encodeURIComponent(name) + '=' + this._getField(name).hash;
+            }).join('&');
+        },
+
+        get: function(name){
+            return this._getField(name).value;
+        },
+        set: function(name, value) {
+            var field = this._getField(name),
+                obj = this._prepareValue(value),
+                hash = lib.hash.getHashCode((obj));
+
+            if (hash !== field.hash) {
+                if (obj instanceof XModel && field.value instanceof XModel) {
+
+                    field.value.names().forEach(function(name) {
+                        if (!obj.hasField(name)) {
+                            field.value.delete(name);
+                        }
+                    });
+
+                    obj.names().forEach(function(name) {
+                        field.value.set(name, obj.get(name));
+                    }, this);
+
+                    field.hash = hash;
+                } else {
+                    this._data[name] = {
+                        value: obj,
+                        hash: hash
+                    };
+                }
+            }
+        },
+        delete: function(name) {
+            delete this._data[name];
+        },
+        names: function() {
+            return Object.keys(this._data);
+        },
+        hasField: function(name) {
+            return this._data.hasOwnProperty(name);
         }
-    },
-    delete: function(name) {
-        delete this._data[name];
-    },
-    names: function() {
-        return Object.keys(this._data);
-    },
-    hasField: function(name) {
-        return this._data.hasOwnProperty(name);
-    }
-});
+    });
+
+})(window.lib);
