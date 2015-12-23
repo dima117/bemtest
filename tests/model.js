@@ -16,6 +16,8 @@ describe('model', function() {
             called = true;
         });
 
+        obj.set('name', 123);
+
         expect(called).to.be.true;
     });
 });

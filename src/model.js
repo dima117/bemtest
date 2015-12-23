@@ -68,7 +68,7 @@
         }
     });
 
-    lib.model = lib.object.extend({
+    lib.model = lib.object.extend(lib.events).extend({
         _data: {},
 
         get: function(name) {
@@ -76,6 +76,7 @@
         },
         set: function(name, value) {
             this._data[name] = value;
+            this.trigger('change');
         }
     });
 
