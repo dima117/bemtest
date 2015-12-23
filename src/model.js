@@ -68,4 +68,15 @@
         }
     });
 
+    lib.model = lib.object.extend({
+        _data: {},
+
+        get: function(name) {
+            return this._data[name];
+        },
+        set: function(name, value) {
+            this._data[name] = value;
+        }
+    });
+
 })(window.lib);

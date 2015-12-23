@@ -4,10 +4,10 @@
 
         getHashCode: function (obj) {
             var hashSourceString = obj && typeof obj.getHashSourceString === 'function'
-                    ? obj.getHashSourceString() + ''
-                    : JSON.stringify(obj) + '';
+                    ? obj.getHashSourceString()
+                    : JSON.stringify(obj);
 
-            return hash.getStringHashCode(hashSourceString, true);
+            return hash.getStringHashCode(hashSourceString + '', true);
         },
 
         getStringHashCode: function(str, asString, seed) {
