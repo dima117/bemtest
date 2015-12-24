@@ -1,5 +1,7 @@
 (function(lib){
 
+    var helpers = lib.helpers;
+
     var XModel = lib.model = lib.object.extend({
         _data: {},
 
@@ -71,11 +73,29 @@
     lib.model = lib.object.extend(lib.events).extend({
         _data: {},
 
+        constructor: function(attrs) {
+            this.set(attrs);
+        },
+
         get: function(name) {
             return this._data[name];
         },
-        set: function(name, value) {
-            this._data[name] = value;
+        set: function(key, value) {
+
+            if (key == null) return;
+
+            var attrs = {};
+
+            if (typeof key === 'object') {
+                attrs = key;
+            } else {
+                attrs[key] = value;
+            }
+
+            helpers.keys(attrs).forEach(function(key) {
+                this._data[key] = attrs[key];
+            }, this);
+
             this.trigger('change');
         }
     });

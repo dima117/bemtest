@@ -17,7 +17,12 @@ describe('model', function() {
             expect(obj.get('a')).to.equal(1);
             expect(obj.get('b')).to.equal(2);
         });
-        it.skip('хэш с массовым присвоением полей в конструктор');
+        it('хэш с массовым присвоением полей в конструктор', function() {
+            var obj = new lib.model({ c: 3, d: 4 });
+
+            expect(obj.get('c')).to.equal(3);
+            expect(obj.get('d')).to.equal(4);
+        });
     });
 
     it('при изменении любого поля генерируется change', function() {
@@ -29,6 +34,17 @@ describe('model', function() {
         obj.set('name', 123);
 
         expect(callback.called).to.be.true;
+    });
+
+    it('если не было изменения полей, то событие change не генерируется', function() {
+        var callback = sinon.spy(),
+            obj = new lib.model({ a: 1 });
+
+        obj.on('change', callback);
+
+        obj.set('a', 1);
+
+        expect(callback.called).to.be.false;
     });
 
     it.skip('при изменении каждого поля генерируется change:field');
