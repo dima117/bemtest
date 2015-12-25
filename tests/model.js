@@ -9,7 +9,7 @@ describe('model', function() {
     });
 
     describe('можно передавать', function() {
-        it('хэш с массовым присвоением полей в сеттер', function() {
+        it('хэш с массовым присвоением полей в set', function() {
             var obj = new lib.model();
 
             obj.set({ a: 1, b: 2 });
@@ -23,6 +23,15 @@ describe('model', function() {
             expect(obj.get('c')).to.equal(3);
             expect(obj.get('d')).to.equal(4);
         });
+    });
+
+    it('экземпляры модели не должны влиять друг на друга', function() {
+        var obj1 = new lib.model(),
+            obj2 = new lib.model();
+
+        obj1.set('a', 123);
+        obj2.set('a', 456);
+        expect(obj1.get('a')).to.equal(123);
     });
 
     it('при изменении любого поля генерируется change', function() {
@@ -44,10 +53,23 @@ describe('model', function() {
 
         obj.set('a', 1);
 
-        expect(callback.called).to.be.false;
+        expect(callback.notCalled).to.be.true;
     });
 
-    it.skip('при изменении каждого поля генерируется change:field');
+    it('при изменении каждого поля генерируется change:field', function() {
+        var callbackA = sinon.spy(),
+            callbackB = sinon.spy(),
+            obj = new lib.model();
+
+        obj.on('change:a', callbackA);
+        obj.on('change:b', callbackB);
+
+        obj.set({ a: 1, b: 2});
+
+        expect(callbackA.calledOnce).to.be.true;
+        expect(callbackB.calledOnce).to.be.true;
+    });
+
     it.skip('в change:field передается новое значение');
     it.skip('при массовом изменении change генерируется только один раз');
     it.skip('если новое значение объект, то набор ключей и их значений сохранятся');

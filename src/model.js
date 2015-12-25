@@ -71,9 +71,8 @@
     });
 
     lib.model = lib.object.extend(lib.events).extend({
-        _data: {},
-
         constructor: function(attrs) {
+            this._data = {};
             this.set(attrs);
         },
 
@@ -84,6 +83,17 @@
 
             if (key == null) return;
 
+            var self = this,
+                attrs = this._normalizeValue(key, value);
+
+            var isChanged = helpers.keys(attrs).reduce(function(prev, key) {
+                return self._setField(key, attrs[key]) || prev;
+            }, false);
+
+            isChanged && this.trigger('change');
+        },
+
+        _normalizeValue: function(key, value) {
             var attrs = {};
 
             if (typeof key === 'object') {
@@ -92,11 +102,18 @@
                 attrs[key] = value;
             }
 
-            helpers.keys(attrs).forEach(function(key) {
-                this._data[key] = attrs[key];
-            }, this);
+            return attrs;
+        },
 
-            this.trigger('change');
+        _setField: function(key, value) {
+            var isChanged = this._data[key] !== value;
+
+            if (isChanged) {
+                this._data[key] = value;
+                this.trigger('change:' + key);
+            }
+
+            return isChanged;
         }
     });
 
