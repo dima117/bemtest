@@ -70,8 +70,19 @@ describe('model', function() {
         expect(callbackB.calledOnce).to.be.true;
     });
 
+    it('при массовом изменении change генерируется только один раз', function() {
+        var callback = sinon.spy(),
+            obj = new lib.model();
+
+        obj.on('change', callback);
+
+        obj.set({ a: 1, b: 2, c: 3});
+
+        expect(callback.calledOnce).to.be.true;
+    });
+
     it.skip('в change:field передается новое значение');
-    it.skip('при массовом изменении change генерируется только один раз');
+
     it.skip('если новое значение объект, то набор ключей и их значений сохранятся');
 
     describe('если старое значение - объект', function() {
