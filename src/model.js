@@ -70,7 +70,7 @@
         }
     });
 
-    lib.model = lib.object.extend(lib.events).extend({
+    var Model = lib.model = lib.object.extend(lib.events).extend({
         constructor: function(attrs) {
             this._data = {};
             this.set(attrs);
@@ -105,15 +105,24 @@
             return attrs;
         },
 
-        _setField: function(key, value) {
-            var isChanged = this._data[key] !== value;
+        _setField: function(key, originalValue) {
+            var value = this._prepareValue(originalValue),
+                isChanged = this._data[key] !== value;
 
             if (isChanged) {
                 this._data[key] = value;
-                this.trigger('change:' + key);
+                this.trigger('change:' + key, { name: key, value: value });
             }
 
             return isChanged;
+        },
+
+        _prepareValue: function(value){
+            if (typeof value === 'object' && value && !(value instanceof Model)) {
+               return new Model();
+            } else {
+                return value;
+            }
         }
     });
 

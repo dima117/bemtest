@@ -52,7 +52,30 @@ describe('model', function() {
             expect(callbackB.calledOnce).to.be.true;
         });
 
-        it.skip('если значение поля не изменилось, то событие change:field не генерируется');
+        it('если значение поля не изменилось, то событие change:field не генерируется', function() {
+            var callback = sinon.spy(),
+                obj = new lib.model({ a: 1 });
+
+            obj.on('change:a', callback);
+
+            obj.set('a', 1 );
+
+            expect(callback.called).to.be.false;
+        });
+
+        it('в change:field передается новое значение', function() {
+            var callback = sinon.spy(),
+                obj = new lib.model(),
+                arg;
+
+                obj.on('change:a', callback);
+
+                obj.set('a', 21 );
+
+                arg = callback.getCall(0).args[0]
+                expect(arg.name).to.equal('a');
+                expect(arg.value).to.equal(21);
+        });
 
         it('при изменении любого поля генерируется change', function() {
             var callback = sinon.spy(),
@@ -89,11 +112,14 @@ describe('model', function() {
     });
 
     describe('вложенные модели', function() {
+        it('если новое значение - объект, то в поле сохраняется модель', function() {
+            var obj = new lib.model();
 
+            obj.set('a', {});
+
+            expect(obj.get('a')).to.be.an.instanceof(lib.model);
+        });
     });
-
-
-    it.skip('в change:field передается новое значение');
 
     it.skip('если новое значение объект, то набор ключей и их значений сохранятся');
 
