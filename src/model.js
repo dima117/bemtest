@@ -76,8 +76,8 @@
             this.set(attrs);
         },
 
-        get: function(name) {
-            return this._data[name];
+        get: function(key) {
+            return this._getData(key).value;
         },
         set: function(key, value) {
 
@@ -109,16 +109,25 @@
             return attrs;
         },
 
+        _getData: function(key) {
+            return this._data[key] || {};
+        },
+
+        _setData: function(key, value) {
+            return this._data[key] = { value: value };
+        },
+
         _setField: function(key, originalValue) {
             var value = this._prepareValue(originalValue),
-                isChanged = this._data[key] !== value;
+                data = this._getData(key),
+                isChanged = data.value !== value;
 
             if (isChanged) {
 
-                if (value instanceof Model && this._data[key] instanceof Model) {
+                if (value instanceof Model && data.value instanceof Model) {
 
                 } else {
-                    this._data[key] = value;
+                    this._setData(key, value);
                 }
 
                 this.trigger('change:' + key, { name: key, value: value });
