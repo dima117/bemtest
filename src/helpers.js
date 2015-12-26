@@ -2,7 +2,7 @@
 
     var idCounter = 0,
         helpers = lib.helpers = {
-            keys: function(obj) { return Object.keys(obj || false)},
+            keys: function(obj) { return Object.keys(obj || false) },
             uniqueId: function() {
                 return ++idCounter + '';
             },

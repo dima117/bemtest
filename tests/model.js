@@ -34,6 +34,21 @@ describe('model', function() {
             obj2.set('a', 456);
             expect(obj1.get('a')).to.equal(123);
         });
+
+    });
+
+    describe('вспомогательные методы', function() {
+       it('метод keys возвращает пустой массив для пустой модели', function() {
+           var obj = new lib.model();
+
+           expect(obj.keys()).to.eql([]);
+       });
+
+       it('метод keys возвращает список полей', function() {
+           var obj = new lib.model({ a: 1, b: 2});
+
+           expect(obj.keys()).to.eql(['a', 'b']);
+       });
     });
 
     describe('события', function() {
@@ -119,9 +134,32 @@ describe('model', function() {
 
             expect(obj.get('a')).to.be.an.instanceof(lib.model);
         });
-    });
 
-    it.skip('если новое значение объект, то набор ключей и их значений сохранятся');
+        it('корректный набор полей у вложенной модели', function() {
+            var obj = new lib.model();
+
+            obj.set('a', { x: 1, y: 2 });
+
+            expect(obj.get('a').keys()).to.eql(['x', 'y']);
+        });
+
+        it('корректно сохраняются поля объекта во вложенной модели', function() {
+            var obj = new lib.model();
+
+            obj.set('a', { x: 1, y: 2 });
+
+            expect(obj.get('a').get('x')).to.equal(1);
+            expect(obj.get('a').get('y')).to.equal(2);
+        });
+
+        it('если в поле хранилась модель, то после присвоения объекта там хранится она же', function() {
+            var obj = new lib.model({ a: { x: 1, y: 2 }}),
+                original = obj.get('a');
+
+            obj.set('a', { z: 3 });
+            expect(obj.get('a')).to.equal(original);
+        });
+    });
 
     describe('если старое значение - объект', function() {
         it.skip('ключи, отсутствующие в новом значении, удалятся (с генерацией событий)');

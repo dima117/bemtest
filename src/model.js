@@ -93,6 +93,10 @@
             isChanged && this.trigger('change');
         },
 
+        keys: function() {
+            return helpers.keys(this._data);
+        },
+
         _normalizeValue: function(key, value) {
             var attrs = {};
 
@@ -110,7 +114,13 @@
                 isChanged = this._data[key] !== value;
 
             if (isChanged) {
-                this._data[key] = value;
+
+                if (value instanceof Model && this._data[key] instanceof Model) {
+
+                } else {
+                    this._data[key] = value;
+                }
+
                 this.trigger('change:' + key, { name: key, value: value });
             }
 
@@ -119,7 +129,7 @@
 
         _prepareValue: function(value){
             if (typeof value === 'object' && value && !(value instanceof Model)) {
-               return new Model();
+               return new Model(value);
             } else {
                 return value;
             }
