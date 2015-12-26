@@ -4,6 +4,11 @@ describe('model', function() {
 
     describe('установка и получение значений', function() {
 
+        it('get возвращает undefined для несуществующего ключа', function() {
+            var obj = new lib.model();
+            expect(obj.get('name')).to.equal(undefined);
+        });
+
         it('get должен возвращать то же самое, что и set', function() {
             var obj = new lib.model();
             obj.set('name', 'testname');
@@ -38,17 +43,44 @@ describe('model', function() {
     });
 
     describe('вспомогательные методы', function() {
-       it('метод keys возвращает пустой массив для пустой модели', function() {
-           var obj = new lib.model();
+        it('метод keys возвращает пустой массив для пустой модели', function() {
+            var obj = new lib.model();
 
-           expect(obj.keys()).to.eql([]);
-       });
+            expect(obj.keys()).to.eql([]);
+        });
 
-       it('метод keys возвращает список полей', function() {
-           var obj = new lib.model({ a: 1, b: 2});
+        it('метод keys возвращает список полей', function() {
+            var obj = new lib.model({ a: 1, b: 2});
 
-           expect(obj.keys()).to.eql(['a', 'b']);
-       });
+            expect(obj.keys()).to.eql(['a', 'b']);
+        });
+
+        it('метод deleteKey удаляет ключ', function() {
+            var obj = new lib.model({ a: 1, b: 2 });
+            obj.deleteKey('b')
+
+            expect(obj.keys()).to.eql(['a']);
+        });
+
+        it('метод hasKey возвращает true для существующего ключа', function() {
+            var obj = new lib.model({ a: 1 });
+
+            expect(obj.hasKey('a')).to.be.true;
+        });
+
+        it('метод hasKey возвращает false для несуществующего ключа', function() {
+            var obj = new lib.model({ a: 1 });
+
+            expect(obj.hasKey('b')).to.be.false;
+        });
+
+        it('метод hasKey возвращает false для удаленного ключа', function() {
+            var obj = new lib.model({ a: 1, b: 2 });
+
+            obj.deleteKey('b')
+
+            expect(obj.hasKey('b')).to.be.false;
+        });
     });
 
     describe('события', function() {
@@ -158,6 +190,13 @@ describe('model', function() {
 
             obj.set('a', { z: 3 });
             expect(obj.get('a')).to.equal(original);
+        });
+
+        it('после присваивания объекта во вложенную модель набор ключей соответствует новому объекту', function() {
+            var obj = new lib.model({ a: { x: 1, y: 2 }});
+
+            obj.set('a', { y: 4, z: 3 });
+            expect(obj.get('a').keys()).to.eql(['y', 'z']);
         });
     });
 

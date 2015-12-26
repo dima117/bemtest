@@ -97,6 +97,14 @@
             return helpers.keys(this._data);
         },
 
+        hasKey: function(key) {
+            return this._data.hasOwnProperty(key);
+        },
+
+        deleteKey: function(key) {
+            delete this._data[key];
+        },
+
         _normalizeValue: function(key, value) {
             var attrs = {};
 
@@ -125,6 +133,14 @@
             if (isChanged) {
 
                 if (value instanceof Model && data.value instanceof Model) {
+                    // todo: вынести в отдельнйы метод
+                    data.value.keys().forEach(function(name) {
+                        !value.hasKey(name) && data.value.deleteKey(name);
+                    });
+
+                    value.keys().forEach(function(name) {
+                        data.value.set(name, value.get(name));
+                    }, this);
 
                 } else {
                     this._setData(key, value);
