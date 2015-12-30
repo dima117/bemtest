@@ -93,17 +93,34 @@
         },
 
         set: function(key, value) {
-
-            if (key == null) return;
-
             var self = this,
-                attrs = this._normalizeValue(key, value);
+                isChanged = false,
+                attrs;
 
-            var isChanged = helpers.keys(attrs).reduce(function(prev, key) {
-                return self._setField(key, attrs[key]) || prev;
-            }, false);
+            if (key != null) {
 
-            isChanged && this.trigger('change');
+                if (key instanceof Model) {
+
+                    isChanged = this.keys().reduce(function(prev, name) {
+                        return (!key.hasKey(name) && self._deleteKey(name)) || prev;
+                    }, false);
+
+                    isChanged = key.keys().reduce(function(prev, name) {
+                        return self._setField(name, key.get(name)) || prev;
+                    }, isChanged);
+
+                } else {
+                    attrs = this._normalizeValue(key, value);
+
+                    isChanged |= helpers.keys(attrs).reduce(function(prev, key) {
+                        return self._setField(key, attrs[key]) || prev;
+                    }, false);
+                }
+
+                isChanged && this.trigger('change');
+            }
+
+            return isChanged;
         },
 
         _deleteKey: function(key) {
@@ -141,17 +158,8 @@
                 isChanged = data.value !== value;
 
             if (isChanged) {
-
                 if (value instanceof Model && data.value instanceof Model) {
-                    // todo: вынести в отдельнйы метод
-                    data.value.keys().forEach(function(name) {
-                        !value.hasKey(name) && data.value._deleteKey(name);
-                    });
-
-                    value.keys().forEach(function(name) {
-                        data.value.set(name, value.get(name));
-                    }, this);
-
+                    data.value.set(value);
                 } else {
                     this._setData(key, value);
                 }
