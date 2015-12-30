@@ -102,7 +102,16 @@
         },
 
         deleteKey: function(key) {
-            delete this._data[key];
+            this._deleteKey(key) && this.trigger('change');
+        },
+
+        _deleteKey: function(key) {
+            if (this.hasKey(key)) {
+                delete this._data[key];
+                this._triggerChangeField(key, undefined);
+                return true;
+            }
+            return false;
         },
 
         _normalizeValue: function(key, value) {
@@ -135,7 +144,7 @@
                 if (value instanceof Model && data.value instanceof Model) {
                     // todo: вынести в отдельнйы метод
                     data.value.keys().forEach(function(name) {
-                        !value.hasKey(name) && data.value.deleteKey(name);
+                        !value.hasKey(name) && data.value._deleteKey(name);
                     });
 
                     value.keys().forEach(function(name) {
@@ -146,10 +155,14 @@
                     this._setData(key, value);
                 }
 
-                this.trigger('change:' + key, { name: key, value: value });
+                this._triggerChangeField(key, value);
             }
 
             return isChanged;
+        },
+
+        _triggerChangeField: function(key, newValue) {
+            this.trigger('change:' + key, { name: key, value: newValue });
         },
 
         _prepareValue: function(value){
