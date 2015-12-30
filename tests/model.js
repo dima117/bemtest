@@ -68,8 +68,21 @@ describe('model', function() {
 
             obj.on('change:b', callback);
 
-            obj.deleteKey('b')
+            obj.deleteKey('b');
             expect(callback.calledOnce).to.be.true;
+        });
+
+        it('при удалении поля в обработчик change:field передается новое значение undefined', function() {
+            var obj = new lib.model({ a: 1, b: 2 }),
+                callback = sinon.spy();
+
+            obj.on('change:b', callback);
+
+            obj.deleteKey('b');
+
+            arg = callback.getCall(0).args[0]
+            expect(arg.name).to.equal('b');
+            expect(arg.value).to.equal(undefined);
         });
 
         it('при удалении поля генерируется событие change', function() {

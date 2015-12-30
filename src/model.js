@@ -76,9 +76,22 @@
             this.set(attrs);
         },
 
+        keys: function() {
+            return helpers.keys(this._data);
+        },
+
+        hasKey: function(key) {
+            return this._data.hasOwnProperty(key);
+        },
+
+        deleteKey: function(key) {
+            this._deleteKey(key) && this.trigger('change');
+        },
+
         get: function(key) {
             return this._getData(key).value;
         },
+
         set: function(key, value) {
 
             if (key == null) return;
@@ -91,18 +104,6 @@
             }, false);
 
             isChanged && this.trigger('change');
-        },
-
-        keys: function() {
-            return helpers.keys(this._data);
-        },
-
-        hasKey: function(key) {
-            return this._data.hasOwnProperty(key);
-        },
-
-        deleteKey: function(key) {
-            this._deleteKey(key) && this.trigger('change');
         },
 
         _deleteKey: function(key) {
