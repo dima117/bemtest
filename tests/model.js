@@ -114,6 +114,23 @@ describe('model', function() {
 
             expect(obj.hasKey('b')).to.be.false;
         });
+
+        it ('результат метода getHashSourceString не зависит от порядка присваивания полей', function() {
+            var obj = new lib.model({ a: 1, b: 2, c: 3}),
+                obj2 = new lib.model({ c: 3, a: 1 });
+
+            obj2.set('b', 2);
+
+            expect(obj.getHashSourceString()).to.equal(obj2.getHashSourceString());
+        });
+
+        it ('getHashSourceString экранирует названия', function() {
+            var obj = new lib.model();
+
+            obj.set('Фыв"as d\'!', 2);
+
+            expect(obj.getHashSourceString()).to.equal('%D0%A4%D1%8B%D0%B2%22as%20d\'!=370cabd5');
+        });
     });
 
     describe('события', function() {

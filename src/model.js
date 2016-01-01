@@ -9,13 +9,13 @@
         },
 
         getHashSourceString: function() {
-            return this.keys().map(function(key) {
+            return this.keys().sort().map(function(key) {
                 return encodeURIComponent(key) + '=' + this._getData(key).hash;
             }, this).join('&');
         },
 
         keys: function() {
-            return helpers.keys(this._data).sort();
+            return helpers.keys(this._data);
         },
 
         hasKey: function(key) {
