@@ -2,82 +2,20 @@
 
     var helpers = lib.helpers;
 
-    var XModel = lib.model = lib.object.extend({
-        _data: {},
-
-        _getField: function(name) {
-            return this._data[name] || {};
-        },
-
-        _prepareValue: function(obj){
-            var model, name;
-
-            if (typeof obj === 'object' && obj && !(obj instanceof XModel)) {
-                model = new XModel();
-
-                for (name in obj) {
-                    model.set(name, obj[name]);
-                }
-            } else {
-                return obj;
-            }
-        },
-
-        getHashSourceString: function() {
-            return this.names().sort().map(function(name) {
-                return encodeURIComponent(name) + '=' + this._getField(name).hash;
-            }).join('&');
-        },
-
-        get: function(name){
-            return this._getField(name).value;
-        },
-        set: function(name, value) {
-            var field = this._getField(name),
-                obj = this._prepareValue(value),
-                hash = lib.hash.getHashCode((obj));
-
-            if (hash !== field.hash) {
-                if (obj instanceof XModel && field.value instanceof XModel) {
-
-                    field.value.names().forEach(function(name) {
-                        if (!obj.hasField(name)) {
-                            field.value.delete(name);
-                        }
-                    });
-
-                    obj.names().forEach(function(name) {
-                        field.value.set(name, obj.get(name));
-                    }, this);
-
-                    field.hash = hash;
-                } else {
-                    this._data[name] = {
-                        value: obj,
-                        hash: hash
-                    };
-                }
-            }
-        },
-        delete: function(name) {
-            delete this._data[name];
-        },
-        names: function() {
-            return Object.keys(this._data);
-        },
-        hasField: function(name) {
-            return this._data.hasOwnProperty(name);
-        }
-    });
-
     var Model = lib.model = lib.object.extend(lib.events).extend({
         constructor: function(attrs) {
             this._data = {};
             this.set(attrs);
         },
 
+        getHashSourceString: function() {
+            return this.keys().map(function(key) {
+                return encodeURIComponent(key) + '=' + this._getData(key).hash;
+            }, this).join('&');
+        },
+
         keys: function() {
-            return helpers.keys(this._data);
+            return helpers.keys(this._data).sort();
         },
 
         hasKey: function(key) {
@@ -148,14 +86,15 @@
             return this._data[key] || {};
         },
 
-        _setData: function(key, value) {
-            return this._data[key] = { value: value };
+        _setData: function(key, value, hash) {
+            return this._data[key] = { value: value, hash: hash };
         },
 
         _setField: function(key, originalValue) {
             var value = this._prepareValue(originalValue),
                 data = this._getData(key),
-                isChanged = data.value !== value,
+                hash = lib.hash.getHashCode(value),
+                isChanged = hash !== data.hash,
                 model;
 
             if (isChanged) {
@@ -163,10 +102,10 @@
                     model = data.value instanceof Model ? data.value : new Model();
                     model.set(value);
 
-                    this._setData(key, model);
+                    this._setData(key, model, hash);
                     this._triggerChangeField(key, model);
                 } else {
-                    this._setData(key, value);
+                    this._setData(key, value, hash);
                     this._triggerChangeField(key, value);
                 }
             }

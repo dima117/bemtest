@@ -357,8 +357,51 @@ describe('model', function() {
                 expect(arg.get('y')).to.equal(2);
             });
 
-            it.skip('если хранилась не модель, то после присваивания хранится новая модель с правильными данными');
+            it('если вложенная модель изменилась, то генерируется change:field', function() {
+                var obj = new lib.model({ a: { x: 1 }}),
+                    inner = obj.get('a'),
+                    callback = sinon.spy(),
+                    arg;
 
+                obj.on('change:a', callback);
+
+                obj.set('a', { x: 2 });
+                expect(callback.calledOnce).to.be.true;
+
+                arg = callback.getCall(0).args[0];
+                expect(arg.name).to.equal('a');
+                expect(arg.value).to.equal(inner);
+            });
+
+            it('если вложенная модель изменилась, то генерируется change', function() {
+                var obj = new lib.model({ a: { x: 1 }}),
+                    callback = sinon.spy();
+
+                obj.on('change', callback);
+
+                obj.set('a', { x: 2 });
+                expect(callback.calledOnce).to.be.true;
+            });
+
+            it('если вложенная модель не изменилась, то не генерируется change:field', function() {
+                var obj = new lib.model({ a: { x: 1 }})
+                    callback = sinon.spy();
+
+                obj.on('change:a', callback);
+
+                obj.set('a', { x: 1 });
+                expect(callback.calledOnce).to.be.false;
+            });
+
+            it('если вложенная модель не изменилась, то не генерируется change', function() {
+                var obj = new lib.model({ a: { x: 1 }})
+                    callback = sinon.spy();
+
+                obj.on('change', callback);
+
+                obj.set('a', { x: 1 });
+                expect(callback.calledOnce).to.be.false;
+            });
         });
     });
 });
