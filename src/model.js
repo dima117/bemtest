@@ -155,16 +155,20 @@
         _setField: function(key, originalValue) {
             var value = this._prepareValue(originalValue),
                 data = this._getData(key),
-                isChanged = data.value !== value;
+                isChanged = data.value !== value,
+                model;
 
             if (isChanged) {
-                if (value instanceof Model && data.value instanceof Model) {
-                    data.value.set(value);
+                if (value instanceof Model) {
+                    model = data.value instanceof Model ? data.value : new Model();
+                    model.set(value);
+
+                    this._setData(key, model);
+                    this._triggerChangeField(key, model);
                 } else {
                     this._setData(key, value);
+                    this._triggerChangeField(key, value);
                 }
-
-                this._triggerChangeField(key, value);
             }
 
             return isChanged;
