@@ -132,7 +132,7 @@ describe('model', function() {
             expect(callbackB.calledOnce).to.be.true;
         });
 
-        it('если значение поля не изменилось, то событие change:field не генерируется', function() {
+        it('если значение поля не изменилось (присвоили то же самое), то событие change:field не генерируется', function() {
             var callback = sinon.spy(),
                 obj = new lib.model({ a: 1 });
 
@@ -143,18 +143,26 @@ describe('model', function() {
             expect(callback.called).to.be.false;
         });
 
+        it('если значение поля не изменилось (не присваивали значение поля), то событие change:field не генерируется', function() {
+            var callback = sinon.spy(),
+                obj = new lib.model({ a: 1 });
+
+            obj.on('change:a', callback);
+
+            obj.set('b', 1 );
+
+            expect(callback.called).to.be.false;
+        });
+
         it('в change:field передается новое значение', function() {
             var callback = sinon.spy(),
-                obj = new lib.model(),
-                arg;
+                obj = new lib.model();
 
-                obj.on('change:a', callback);
+            obj.on('change:a', callback);
 
-                obj.set('a', 21 );
+            obj.set('a', 21 );
 
-                arg = callback.getCall(0).args[0]
-                expect(arg.name).to.equal('a');
-                expect(arg.value).to.equal(21);
+            expect(callback.getCall(0).args[0]).to.eql({ name: 'a', value: 21 });
         });
 
         it('при изменении любого поля генерируется change', function() {
@@ -188,6 +196,101 @@ describe('model', function() {
             obj.set('a', 1);
 
             expect(callback.notCalled).to.be.true;
+        });
+    });
+
+    describe('мерж моделей (присваиваем модель)', function() {
+
+        it('набор ключей соответствует присвоенному объекту', function() {
+            var obj = new lib.model({ x: 1, y: 2 }),
+                obj2 = new lib.model({ y: 4, z: 3 });
+
+            obj.set(obj2);
+            expect(obj.keys()).to.eql(['y', 'z']);
+        });
+
+        it('сохраняются значения полей присвоенного объекта', function() {
+            var obj = new lib.model({ x: 1, y: 2 }),
+                obj2 = new lib.model({ y: 4, z: 3 });
+
+            obj.set(obj2);
+            expect(obj.get('y')).to.equal(4);
+            expect(obj.get('z')).to.equal(3);
+        });
+
+        it('генерируется change:field для каждого удаленного поля', function() {
+            var obj = new lib.model({ x: 1, y: 2 }),
+                obj2 = new lib.model({ y: 5 }),
+                callback = sinon.spy();
+
+            obj.on('change:x', callback);
+
+            obj.set(obj2);
+
+            expect(callback.calledOnce).to.be.true;
+            expect(callback.getCall(0).args[0]).to.eql({ name: 'x', value: undefined });
+        });
+
+        it('генерируется change:field для каждого добавленного поля', function() {
+            var obj = new lib.model(),
+                obj2 = new lib.model({ a: 5 }),
+                callback = sinon.spy();
+
+            obj.on('change:a', callback);
+
+            obj.set(obj2);
+
+            expect(callback.calledOnce).to.be.true;
+            expect(callback.getCall(0).args[0]).to.eql({ name: 'a', value: 5 });
+        });
+
+        it('генерируется change:field для каждого измененного поля', function() {
+            var obj = new lib.model({ a: 1 }),
+                obj2 = new lib.model({ a: 7 }),
+                callback = sinon.spy();
+
+            obj.on('change:a', callback);
+
+            obj.set(obj2);
+
+            expect(callback.calledOnce).to.be.true;
+            expect(callback.getCall(0).args[0]).to.eql({ name: 'a', value: 7 });
+        });
+
+        it('если нет изменений, то change:field не генерируется', function() {
+            var obj = new lib.model({ a: 1 }),
+                obj2 = new lib.model({ a: 1 }),
+                callback = sinon.spy();
+
+            obj.on('change:a', callback);
+
+            obj.set(obj2);
+
+            expect(callback.called).to.be.false;
+        });
+
+        it ('при изменении нескольких полей событие change генерируется только один раз', function() {
+            var obj = new lib.model({ a: 1, b: 2 }),
+                obj2 = new lib.model({ b: 3, c: 4 }),
+                callback = sinon.spy();
+
+            obj.on('change', callback);
+
+            obj.set(obj2);
+
+            expect(callback.calledOnce).to.be.true;
+        });
+
+        it ('если данные не изменились, то событие change не генерируется', function() {
+            var obj = new lib.model({ a: 1, b: 2 }),
+                obj2 = new lib.model({ a: 1, b: 2 }),
+                callback = sinon.spy();
+
+            obj.on('change', callback);
+
+            obj.set(obj2);
+
+            expect(callback.called).to.be.false;
         });
     });
 
@@ -229,38 +332,23 @@ describe('model', function() {
                 expect(obj.get('a')).to.equal(original);
             });
 
-            it('набор ключей соответствует присвоенному объекту', function() {
-                var obj = new lib.model({ a: { x: 1, y: 2 }});
+            it('у хранящейся в поле модели вызывается set с моделью присваемового объекта', function() {
+                var obj = new lib.model({ a: {}}),
+                    inner = obj.get('a'),
+                    spy = sinon.spy(inner, 'set'),
+                    arg;
 
-                obj.set('a', { y: 4, z: 3 });
-                expect(obj.get('a').keys()).to.eql(['y', 'z']);
+                obj.set('a', { x: 1, y: 2});
+
+                expect(spy.calledOnce).to.be.true;
+
+                arg = spy.getCall(0).args[0];
+                expect(arg.get('x')).to.equal(1);
+                expect(arg.get('y')).to.equal(2);
             });
 
-            it('сохраняются значения полей присвоенного объекта', function() {
-                var obj = new lib.model({ a: { x: 1, y: 2 }});
+            it.skip('если хранилась не модель, то после присваивания хранится новая модель с правильными данными');
 
-                obj.set('a', { y: 4, z: 3 });
-                expect(obj.get('a').get('y')).to.equal(4);
-                expect(obj.get('a').get('z')).to.equal(3);
-            });
-
-            it('у вложенной модели генерируется change:field для каждого поля', function() {
-                var callbackX = sinon.spy(),
-                    callbackY = sinon.spy(),
-                    callbackZ = sinon.spy(),
-                    obj = new lib.model({ a: { x: 1, y: 2 }}),
-                    inner = obj.get('a');
-
-                inner.on('change:x', callbackX);
-                inner.on('change:y', callbackY);
-                inner.on('change:z', callbackZ);
-
-                obj.set('a', { y: 4, z: 3 });
-
-                expect(callbackX.calledOnce, 'x').to.be.true;
-                expect(callbackY.calledOnce, 'y').to.be.true;
-                expect(callbackZ.calledOnce, 'z').to.be.true;
-            });
         });
     });
 
