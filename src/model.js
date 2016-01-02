@@ -61,8 +61,23 @@
             return isChanged;
         },
 
+        toJSON: function() {
+            var self = this;
+            return this.keys().reduce(function(prev, key) {
+                var value = self.get(key);
+                prev[key] = value && typeof value.toJSON === 'function' ? value.toJSON() : value;
+                return prev;
+            }, {});
+        },
+
+        _stopListeningValue: function(key) {
+            var currentValue = this._getData(key).value;
+            currentValue instanceof Model && this.stopListening(currentValue);
+        },
+
         _deleteKey: function(key) {
             if (this.hasKey(key)) {
+                this._stopListeningValue(key);
                 delete this._data[key];
                 this._triggerChangeField(key, undefined);
                 return true;
@@ -91,6 +106,16 @@
         },
 
         _setData: function(key, value, hash) {
+            this._stopListeningValue(key);
+
+            value instanceof Model && this.listenTo(value, 'change', function(e) {
+                if (e.chain[this._cid]) return;
+
+                this._getData(key).hash = lib.hash.getHashCode(value);
+                this._triggerChangeField(key, value);
+                this._triggerChange(e.chain);
+            });
+
             return this._data[key] = { value: value, hash: hash };
         },
 
@@ -103,7 +128,7 @@
 
             if (isChanged) {
                 if (value instanceof Model) {
-                    model = data.value instanceof Model ? data.value : this._createModel(key);
+                    model = data.value instanceof Model ? data.value : new Model();
                     model.set(value, chain);
 
                     this._setData(key, model, hash);
@@ -133,20 +158,6 @@
 
         _triggerChange: function(chain) {
             this.trigger('change', { chain: chain });
-        },
-
-        _createModel: function(key) {
-            var model = new Model();
-
-            this.listenTo(model, 'change', function(e) {
-                if (e.chain[this._cid]) return;
-
-                this._getData(key).hash = lib.hash.getHashCode(model);
-                this._triggerChangeField(key, model);
-                this._triggerChange(e.chain);
-            });
-
-            return model;
         },
 
         _prepareValue: function(value){

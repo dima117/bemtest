@@ -423,30 +423,99 @@ describe('model', function() {
 
         describe('изменение вложенных моделей', function() {
 
-            it('если вложенная модель изменилась, то генерируется change:field', function() {
-                var obj = new lib.model( { a: { x: 1 }}),
-                    callback = sinon.spy();
+            describe('если вложенная модель изменилась', function() {
 
-                obj.on('change:a', callback);
+                it('генерируется change:field', function() {
+                    var obj = new lib.model( { a: { x: 1 }}),
+                        callback = sinon.spy();
 
-                obj.get('a').set({ x: 2 });
+                    obj.on('change:a', callback);
 
-                expect(callback.calledOnce).to.be.true;
-                expect(callback.getCall(0).args[0].value).to.equal(obj.get('a'));
+                    obj.get('a').set({ x: 2 });
+
+                    expect(callback.calledOnce).to.be.true;
+                    expect(callback.getCall(0).args[0].value).to.equal(obj.get('a'));
+                });
+
+                it('генерируется change', function() {
+                    var obj = new lib.model( { a: { x: 1 }}),
+                        callback = sinon.spy();
+
+                    obj.on('change', callback);
+
+                    obj.get('a').set({ x: 2 });
+
+                    expect(callback.calledOnce).to.be.true;
+                });
             });
 
-            it('если вложенная модель изменилась, то генерируется change', function() {
-                var obj = new lib.model( { a: { x: 1 }}),
-                    callback = sinon.spy();
+            describe('если модель больше не является вложенной (присвоили в поле другое значение)', function() {
 
-                obj.on('change', callback);
+                it('изменения не генерируют событие change:field в родительской модели', function() {
+                    var obj = new lib.model({ a: { x: 1}}),
+                        inner = obj.get('a'),
+                        callback = sinon.spy();
 
-                obj.get('a').set({ x: 2 });
+                    obj.set('a', 21);
 
-                expect(callback.calledOnce).to.be.true;
+                    obj.on('change:a', callback);
+                    inner.set('x', 3);
+                    expect(callback.called).to.be.false;
+                });
+
+                it('изменения не генерируют событие change в родительской модели', function() {
+                    var obj = new lib.model({ a: { x: 1}}),
+                        inner = obj.get('a'),
+                        callback = sinon.spy();
+
+                    obj.set('a', 21);
+
+                    obj.on('change', callback);
+                    inner.set('x', 3);
+                    expect(callback.called).to.be.false;
+                });
             });
 
-            it.skip('если модель больше не является вложенной, то ее изменения не генерируют событий в родительской модели')
+            describe('если модель больше не является вложенной (удалили поле)', function() {
+
+                it('изменения не генерируют событие change:field в родительской модели', function() {
+                    var obj = new lib.model({ a: { x: 1}}),
+                        inner = obj.get('a'),
+                        callback = sinon.spy();
+
+                    obj.deleteKey('a');
+
+                    obj.on('change:a', callback);
+                    inner.set('x', 3);
+                    expect(callback.called).to.be.false;
+                });
+
+                it('изменения не генерируют событие change в родительской модели', function() {
+                    var obj = new lib.model({ a: { x: 1}}),
+                        inner = obj.get('a'),
+                        callback = sinon.spy();
+
+                    obj.deleteKey('a');
+
+                    obj.on('change', callback);
+                    inner.set('x', 3);
+                    expect(callback.called).to.be.false;
+                });
+            });
+        });
+    });
+
+    describe('toJSON', function() {
+        it('поля и значения объекта соответствуют полям модели', function() {
+            var obj = new lib.model({ a: 1, b: '2', c: null, d: undefined });
+
+            expect(obj.toJSON()).to.eql({ a: 1, b: '2', c: null, d: undefined });
+        });
+
+        it('вложенная модель становится объектом', function() {
+            var obj = new lib.model({ a: { b: 1, c: 2 }});
+
+            expect(obj.toJSON()).to.eql({ a: { b: 1, c: 2 }});
         });
     });
 });

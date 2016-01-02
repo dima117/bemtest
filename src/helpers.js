@@ -6,6 +6,9 @@
             uniqueId: function() {
                 return ++idCounter + '';
             },
+            isEmpty: function(obj) {
+                return helpers.keys(obj).length === 0;
+            },
             size: function(obj) {
                 return helpers.keys(obj).length;
             },
