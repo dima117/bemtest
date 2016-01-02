@@ -420,5 +420,33 @@ describe('model', function() {
                 expect(callback.calledOnce).to.be.false;
             });
         });
+
+        describe('изменение вложенных моделей', function() {
+
+            it('если вложенная модель изменилась, то генерируется change:field', function() {
+                var obj = new lib.model( { a: { x: 1 }}),
+                    callback = sinon.spy();
+
+                obj.on('change:a', callback);
+
+                obj.get('a').set({ x: 2 });
+
+                expect(callback.calledOnce).to.be.true;
+                expect(callback.getCall(0).args[0].value).to.equal(obj.get('a'));
+            });
+
+            it('если вложенная модель изменилась, то генерируется change', function() {
+                var obj = new lib.model( { a: { x: 1 }}),
+                    callback = sinon.spy();
+
+                obj.on('change', callback);
+
+                obj.get('a').set({ x: 2 });
+
+                expect(callback.calledOnce).to.be.true;
+            });
+
+            it.skip('если модель больше не является вложенной, то ее изменения не генерируют событий в родительской модели')
+        });
     });
 });

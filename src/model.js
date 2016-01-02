@@ -5,6 +5,7 @@
     var Model = lib.model = lib.object.extend(lib.events).extend({
         constructor: function(attrs) {
             this._data = {};
+            this._cid = helpers.uniqueId();
             this.set(attrs);
         },
 
@@ -30,32 +31,31 @@
             return this._getData(key).value;
         },
 
-        set: function(key, value) {
+        set: function(arg0) {
             var self = this,
                 isChanged = false,
-                attrs;
+                args, chain;
 
-            if (key != null) {
+            if (arg0 != null) {
+                args = this._normalizeArgs(arguments)
+                chain = this._extendChain(args.chain);
 
-                if (key instanceof Model) {
-
+                if (args.value instanceof Model) {
                     isChanged = this.keys().reduce(function(prev, name) {
-                        return (!key.hasKey(name) && self._deleteKey(name)) || prev;
+                        return (!args.value.hasKey(name) && self._deleteKey(name)) || prev;
                     }, false);
 
-                    isChanged = key.keys().reduce(function(prev, name) {
-                        return self._setField(name, key.get(name)) || prev;
+                    isChanged = args.value.keys().reduce(function(prev, name) {
+                        return self._setField(name, args.value.get(name), chain) || prev;
                     }, isChanged);
 
                 } else {
-                    attrs = this._normalizeValue(key, value);
-
-                    isChanged |= helpers.keys(attrs).reduce(function(prev, key) {
-                        return self._setField(key, attrs[key]) || prev;
+                    isChanged |= helpers.keys(args.value).reduce(function(prev, name) {
+                        return self._setField(name, args.value[name], chain) || prev;
                     }, false);
                 }
 
-                isChanged && this.trigger('change');
+                isChanged && this._triggerChange(chain);
             }
 
             return isChanged;
@@ -70,16 +70,20 @@
             return false;
         },
 
-        _normalizeValue: function(key, value) {
-            var attrs = {};
+        _normalizeArgs: function(args) {
+            var result = { value: {}},
+                arg0 = args[0],
+                arg1 = args[1];
 
-            if (typeof key === 'object') {
-                attrs = key;
+            if (typeof arg0 === 'object') {
+                result.value = arg0;
+                result.chain = arg1;
             } else {
-                attrs[key] = value;
+                result.value[arg0] = arg1;
+                result.chain = args[2];
             }
 
-            return attrs;
+            return result;
         },
 
         _getData: function(key) {
@@ -90,7 +94,7 @@
             return this._data[key] = { value: value, hash: hash };
         },
 
-        _setField: function(key, originalValue) {
+        _setField: function(key, originalValue, chain) {
             var value = this._prepareValue(originalValue),
                 data = this._getData(key),
                 hash = lib.hash.getHashCode(value),
@@ -99,8 +103,8 @@
 
             if (isChanged) {
                 if (value instanceof Model) {
-                    model = data.value instanceof Model ? data.value : new Model();
-                    model.set(value);
+                    model = data.value instanceof Model ? data.value : this._createModel(key);
+                    model.set(value, chain);
 
                     this._setData(key, model, hash);
                     this._triggerChangeField(key, model);
@@ -113,8 +117,36 @@
             return isChanged;
         },
 
+        _extendChain: function(prev) {
+            var fn = function(cid) {
+                this[cid] = true;
+            };
+
+            fn.prototype = prev;
+
+            return new fn(this._cid);
+        },
+
         _triggerChangeField: function(key, newValue) {
             this.trigger('change:' + key, { name: key, value: newValue });
+        },
+
+        _triggerChange: function(chain) {
+            this.trigger('change', { chain: chain });
+        },
+
+        _createModel: function(key) {
+            var model = new Model();
+
+            this.listenTo(model, 'change', function(e) {
+                if (e.chain[this._cid]) return;
+
+                this._getData(key).hash = lib.hash.getHashCode(model);
+                this._triggerChangeField(key, model);
+                this._triggerChange(e.chain);
+            });
+
+            return model;
         },
 
         _prepareValue: function(value){
