@@ -15,8 +15,6 @@ modules.define(
 
                             var self = this;
 
-                            this.model = new lib.model(this.params);
-
                             this.model
                                 .on('change:name', function(e) { console.log('change preview name'); self.ui.name.text(e.value); })
                                 .on('change:surname', function(e) { console.log('change preview surname'); self.ui.surname.text(e.value); })
@@ -32,6 +30,14 @@ modules.define(
                         name: true,
                         surname: true,
                         age: true
+                    },
+
+                    bind: {
+                        model: {
+                            name: { elem: 'name', type: 'text' },
+                            surname: { elem: 'surname', type: 'text' },
+                            age: { elem: 'age', type: 'text' }
+                        }
                     }
                 }));
 

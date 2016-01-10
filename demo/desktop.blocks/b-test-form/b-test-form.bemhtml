@@ -1,7 +1,7 @@
 block('b-test-form')(
     tag()('form'),
     js()(function() {
-        return this.ctx.data;
+        return { data: this.ctx.data };
     }),
     content()(function() {
         return [

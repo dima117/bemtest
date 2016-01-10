@@ -15,8 +15,6 @@ modules.define(
 
                             var self = this;
 
-                            this.model = new lib.model(this.params);
-
                             this.model
                                 .on('change:name', function(e) { console.log('change form name'); self.ui.name.setVal(e.value); })
                                 .on('change:surname', function(e) { console.log('change form surname'); self.ui.surname.setVal(e.value); })
@@ -45,6 +43,14 @@ modules.define(
                         name: 'input',
                         surname: 'input',
                         age: 'input'
+                    },
+
+                    bind: {
+                        model: {
+                            name: { elem: 'name', type: 'setVal' },
+                            surname: { elem: 'surname', type: 'setVal' },
+                            age: { elem: 'age', type: 'setVal' }
+                        }
                     }
                 }));
 
