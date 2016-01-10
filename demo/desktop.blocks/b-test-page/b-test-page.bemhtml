@@ -1,0 +1,19 @@
+block('b-test-page')(
+    js()(function() {
+        return this.ctx.data;
+    }),
+    content()(function() {
+        return [
+            {
+                block: 'b-test-form',
+                mix: { block: 'b-test-page', elem: 'form' },
+                data: this.ctx.data
+            },
+            {
+                block: 'b-test-preview',
+                mix: { block: 'b-test-page', elem: 'preview' },
+                data: this.ctx.data
+            }
+        ];
+    })
+);

@@ -1,0 +1,21 @@
+block('b-test-preview')(
+    js()(function() {
+        return this.ctx.data;
+    }),
+    content()(function() {
+        return [
+            {
+                elem: 'name',
+                content: this.ctx.data.name
+            },
+            {
+                elem: 'surname',
+                content: this.ctx.data.surname
+            },
+            {
+                elem: 'age',
+                content: this.ctx.data.age
+            }
+        ];
+    })
+);

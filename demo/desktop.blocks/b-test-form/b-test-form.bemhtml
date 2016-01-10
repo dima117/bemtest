@@ -1,0 +1,55 @@
+block('b-test-form')(
+    tag()('form'),
+    js()(function() {
+        return this.ctx.data;
+    }),
+    content()(function() {
+        return [
+            {
+                elem: 'field',
+                content: [
+                    { elem: 'field-label', content: 'Name' },
+                    {
+                        elem: 'field-control',
+                        content: {
+                            block : 'input',
+                            mix: { block: 'b-test-form', elem: 'name' },
+                            mods : { theme : 'islands', size : 'm' },
+                            val: this.ctx.data.name
+                        }
+                    }
+                ]
+            },
+            {
+                elem: 'field',
+                content: [
+                    { elem: 'field-label', content: 'Surname' },
+                    {
+                        elem: 'field-control',
+                        content: {
+                            block : 'input',
+                            mix: { block: 'b-test-form', elem: 'surname' },
+                            mods : { theme : 'islands', size : 'm' },
+                            val: this.ctx.data.surname
+                        }
+                    }
+                ]
+            },
+            {
+                elem: 'field',
+                content: [
+                    { elem: 'field-label', content: 'Age' },
+                    {
+                        elem: 'field-control',
+                        content: {
+                            block : 'input',
+                            mix: { block: 'b-test-form', elem: 'age' },
+                            mods : { theme : 'islands', size : 'm' },
+                            val: this.ctx.data.age
+                        }
+                    }
+                ]
+            }
+        ];
+    })
+);

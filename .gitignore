@@ -1,0 +1,5 @@
+bower_components
+demo/.enb/tmp
+demo/desktop.bundles
+demo/libs
+node_modules

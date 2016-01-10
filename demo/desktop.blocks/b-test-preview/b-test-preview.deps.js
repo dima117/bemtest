@@ -1,0 +1,6 @@
+[{
+    shouldDeps : [
+        { block: 'b-box'}
+    ]
+}]
+
