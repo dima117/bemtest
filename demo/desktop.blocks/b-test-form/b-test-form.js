@@ -15,11 +15,7 @@ modules.define(
 
                             var self = this;
 
-                            this.model
-                                .on('change:name', function(e) { console.log('change form name'); self.ui.name.setVal(e.value); })
-                                .on('change:surname', function(e) { console.log('change form surname'); self.ui.surname.setVal(e.value); })
-                                .on('change:age', function(e) { console.log('change form age'); self.ui.age.setVal(e.value); })
-                                .on('change', function() { self.emit('change', self.model); });
+                            this.model.on('change', function() { self.emit('change', self.model); });
 
                             this.ui.name.on('change', function() {
                                 self.model.set('name', this.getVal());

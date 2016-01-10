@@ -8,24 +8,6 @@ modules.define(
                     baseBlock : xxx
                 },
                 {
-                    onSetMod: {
-                        js: function() {
-
-                            this.__base.apply(this, arguments);
-
-                            var self = this;
-
-                            this.model
-                                .on('change:name', function(e) { console.log('change preview name'); self.ui.name.text(e.value); })
-                                .on('change:surname', function(e) { console.log('change preview surname'); self.ui.surname.text(e.value); })
-                                .on('change:age', function(e) { console.log('change preview age'); self.ui.age.text(e.value); });
-                        }
-                    },
-
-                    setVal: function(value) {
-                        this.model.set(value);
-                    },
-
                     ui: {
                         name: true,
                         surname: true,
@@ -38,7 +20,10 @@ modules.define(
                             surname: { elem: 'surname', type: 'text' },
                             age: { elem: 'age', type: 'text' }
                         }
+                    },
+
+                    setVal: function(value) {
+                        this.model.set(value);
                     }
                 }));
-
     });
