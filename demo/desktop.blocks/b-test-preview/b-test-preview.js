@@ -1,19 +1,19 @@
 modules.define(
-    'b-test-preview', ['i-bem__dom'], function(provide, BEMDOM) {
+    'b-test-preview', ['i-bem__dom', 'b-xxx'], function(provide, BEMDOM, xxx) {
 
         provide(
             BEMDOM.decl(
-                this.name, {
+                {
+                    block : this.name,
+                    baseBlock : xxx
+                },
+                {
                     onSetMod: {
                         js: function() {
 
-                            var self = this;
+                            this.__base.apply(this, arguments);
 
-                            this.ui = {
-                                name: this.elem('name'),
-                                surname: this.elem('surname'),
-                                age: this.elem('age')
-                            };
+                            var self = this;
 
                             this.model = new lib.model(this.params);
 
@@ -26,6 +26,12 @@ modules.define(
 
                     setVal: function(value) {
                         this.model.set(value);
+                    },
+
+                    ui: {
+                        name: true,
+                        surname: true,
+                        age: true
                     }
                 }));
 

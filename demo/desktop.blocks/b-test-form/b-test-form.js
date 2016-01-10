@@ -1,19 +1,19 @@
 modules.define(
-    'b-test-form', ['i-bem__dom'], function(provide, BEMDOM) {
+    'b-test-form', ['i-bem__dom', 'b-xxx'], function(provide, BEMDOM, xxx) {
 
         provide(
             BEMDOM.decl(
-                this.name, {
+                {
+                    block : this.name,
+                    baseBlock : xxx
+                },
+                {
                     onSetMod: {
                         js: function() {
 
-                            var self = this;
+                            this.__base.apply(this, arguments);
 
-                            this.ui = {
-                                name: this.findBlockOn('name', 'input'),
-                                surname: this.findBlockOn('surname', 'input'),
-                                age: this.findBlockOn('age', 'input')
-                            };
+                            var self = this;
 
                             this.model = new lib.model(this.params);
 
@@ -39,6 +39,12 @@ modules.define(
 
                     setVal: function(value) {
                         this.model.set(value);
+                    },
+
+                    ui: {
+                        name: 'input',
+                        surname: 'input',
+                        age: 'input'
                     }
                 }));
 
