@@ -5,9 +5,17 @@ block('b-test-page')(
     content()(function() {
         return [
             {
+                elem: 'header',
+                content: 'Form'
+            },
+            {
                 block: 'b-test-form',
                 mix: { block: 'b-test-page', elem: 'form' },
                 data: this.ctx.data
+            },
+            {
+                elem: 'header',
+                content: 'Preview'
             },
             {
                 block: 'b-test-preview',

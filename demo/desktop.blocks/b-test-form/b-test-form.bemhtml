@@ -49,6 +49,15 @@ block('b-test-form')(
                         }
                     }
                 ]
+            },
+            {
+                elem: 'actions',
+                content: {
+                    block : 'button',
+                    mix: { block: 'b-test-form', elem: 'submit' },
+                    mods : { theme : 'islands', size : 'm' },
+                    text : 'Submit'
+                }
             }
         ];
     })

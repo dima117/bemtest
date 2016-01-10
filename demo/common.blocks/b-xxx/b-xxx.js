@@ -8,7 +8,8 @@ modules.define(
                         js: function() {
 
                             var ui = this.ui,
-                                bind = this.bind;
+                                bind = this.bind,
+                                events = this.events;
 
                             // model
                             this.createModel();
@@ -25,21 +26,31 @@ modules.define(
                                     modelBindings = bind[key];
 
                                 Object.keys(modelBindings).forEach(function(field) {
-                                    var event = field ? 'change:' + field : 'change',
-                                        fieldBindings = modelBindings[field];
+                                    var event = field ? 'change:' + field : 'change';
 
-                                    !(fieldBindings instanceof Array) && (fieldBindings = [fieldBindings]);
+                                    this._ensureArray(modelBindings[field])
+                                        .forEach(function(params) {
+                                            var binder = this.binders[params.type],
+                                                elem = ui[params.elem];
 
-                                    fieldBindings.forEach(function(params) {
-                                        var binder = this.binders[params.type],
-                                            elem = ui[params.elem];
-
-                                        binder && elem && model.on(event, function(e) {
-                                            binder(elem, event === 'change' ? model : e.value);
-                                        });
-                                    }, this);
+                                            binder && elem && model.on(event, function(e) {
+                                                binder(elem, event === 'change' ? model : e.value);
+                                            });
+                                        }, this);
                                 }, this);
                             }, this);
+
+                            // events
+                            Object.keys(events).forEach(function(key) {
+                                var elem = ui[key];
+
+                                this._ensureArray(events[key])
+                                    .forEach(function(params) {
+                                        elem.on(params.event, params.fn, this);
+                                    }, this);
+                            }, this);
+
+                            this.initEvents();
                         }
                     },
 
@@ -55,6 +66,10 @@ modules.define(
 
                     bind: {},
 
+                    events: {},
+
+                    initEvents: function() {},
+
                     binders: {
                         setVal: function(el, value) {
                             el.setVal && el.setVal(value);
@@ -62,6 +77,10 @@ modules.define(
                         text: function(el, value) {
                             el.text && el.text(value);
                         }
+                    },
+
+                    _ensureArray: function(arg) {
+                        return arg instanceof Array ? arg : [arg];
                     }
                 }));
 

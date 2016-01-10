@@ -1,0 +1,10 @@
+.b-test-page
+{
+    font-family: sans-serif;
+}
+
+.b-test-page__header
+{
+    font-weight: bold;
+    margin: 1em 0;
+}

@@ -1,0 +1,11 @@
+.b-test-form__field
+{
+    margin-bottom: 0.4em;
+}
+
+.b-test-form__field-label
+{
+    color: #808080;
+    font-size: 0.8em;
+    margin-bottom: 0.2em;
+}
