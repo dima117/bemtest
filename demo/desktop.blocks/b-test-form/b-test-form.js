@@ -31,10 +31,6 @@ modules.define(
                         }
                     },
 
-                    setVal: function(value) {
-                        this.model.set(value);
-                    },
-
                     ui: {
                         name: 'input',
                         surname: 'input',

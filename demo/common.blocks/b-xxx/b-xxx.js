@@ -24,17 +24,27 @@ modules.define(
                                 var model = this[key],
                                     modelBindings = bind[key];
 
-                                model.keys().forEach(function(field) {
-                                    var params = modelBindings[field],
-                                        binder = this.binders[params.type],
-                                        elem = ui[params.elem];
+                                Object.keys(modelBindings).forEach(function(field) {
+                                    var event = field ? 'change:' + field : 'change',
+                                        fieldBindings = modelBindings[field];
 
-                                    binder && elem && model.on('change:' + field, function(e) {
-                                        binder(elem, e.value);
-                                    });
+                                    !(fieldBindings instanceof Array) && (fieldBindings = [fieldBindings]);
+
+                                    fieldBindings.forEach(function(params) {
+                                        var binder = this.binders[params.type],
+                                            elem = ui[params.elem];
+
+                                        binder && elem && model.on(event, function(e) {
+                                            binder(elem, event === 'change' ? model : e.value);
+                                        });
+                                    }, this);
                                 }, this);
                             }, this);
                         }
+                    },
+
+                    setVal: function(value, modelFieldName) {
+                        this[modelFieldName || 'model'].set(value);
                     },
 
                     createModel: function() {

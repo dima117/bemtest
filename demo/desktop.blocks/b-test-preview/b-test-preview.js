@@ -20,10 +20,6 @@ modules.define(
                             surname: { elem: 'surname', type: 'text' },
                             age: { elem: 'age', type: 'text' }
                         }
-                    },
-
-                    setVal: function(value) {
-                        this.model.set(value);
                     }
                 }));
     });

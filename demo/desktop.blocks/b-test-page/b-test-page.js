@@ -1,29 +1,35 @@
 modules.define(
-    'b-test-page', ['i-bem__dom'], function(provide, BEMDOM) {
+    'b-test-page', ['i-bem__dom', 'b-xxx'], function(provide, BEMDOM, xxx) {
 
         provide(
             BEMDOM.decl(
-                this.name, {
+                {
+                    block : this.name,
+                    baseBlock : xxx
+                },
+                {
                     onSetMod: {
                         js: function() {
 
-                            var self = this;
-
-                            this.ui = {
-                                form: this.findBlockOn('form', 'b-test-form'),
-                                preview: this.findBlockOn('preview', 'b-test-preview')
-                            };
-
-                            this.model = new lib.model(this.params);
-
-                            this.model.on('change', function() {
-                                self.ui.form.setVal(self.model);
-                                self.ui.preview.setVal(self.model);
-                            });
+                            this.__base.apply(this, arguments);
 
                             this.ui.form.on('change', function(e, data) {
-                                self.model.set(data);
-                            });
+                                this.model.set(data);
+                            }, this);
+                        }
+                    },
+
+                    ui: {
+                        form: 'b-test-form',
+                        preview: 'b-test-preview'
+                    },
+
+                    bind: {
+                        model: {
+                            '': [
+                                { elem: 'form', type: 'setVal' },
+                                { elem: 'preview', type: 'setVal' }
+                            ]
                         }
                     }
                 }));
