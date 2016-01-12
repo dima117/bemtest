@@ -8,17 +8,6 @@ modules.define(
                     baseBlock : xxx
                 },
                 {
-                    onSetMod: {
-                        js: function() {
-
-                            this.__base.apply(this, arguments);
-
-                            this.ui.form.on('change', function(e, data) {
-                                this.model.set(data);
-                            }, this);
-                        }
-                    },
-
                     ui: {
                         form: 'b-test-form',
                         preview: 'b-test-preview'
@@ -30,6 +19,15 @@ modules.define(
                                 { elem: 'form', type: 'setVal' },
                                 { elem: 'preview', type: 'setVal' }
                             ]
+                        }
+                    },
+
+                    events: {
+                        form: {
+                            event: 'change',
+                            fn: function(e, data) {
+                                this.model.set(data);
+                            }
                         }
                     }
                 }));
