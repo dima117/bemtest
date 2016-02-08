@@ -15,7 +15,8 @@ modules.define(
 
                     bind: {
                         model: {
-                            '': [
+                            // привязываем всю модель к дочерним блокам
+                            '*': [
                                 { elem: 'form', type: 'setVal' },
                                 { elem: 'preview', type: 'setVal' }
                             ]

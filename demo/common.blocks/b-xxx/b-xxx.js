@@ -26,7 +26,7 @@ modules.define(
                                     modelBindings = bind[key];
 
                                 Object.keys(modelBindings).forEach(function(field) {
-                                    var event = field ? 'change:' + field : 'change';
+                                    var event = field === '*' ? 'change' : 'change:' + field;
 
                                     this._ensureArray(modelBindings[field])
                                         .forEach(function(params) {
