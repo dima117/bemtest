@@ -31,41 +31,42 @@
             return this._getData(key).value;
         },
 
-        set: function(arg0) {
+        set: function() {
             var self = this,
                 isChanged = false,
-                args, chain;
+                args = this._normalizeArgs.apply(this, arguments),
+                chain;
 
-            if (arg0 != null) {
-                args = this._normalizeArgs(arguments)
+            if (args.value) {
                 chain = this._extendChain(args.chain);
 
-                if (args.value instanceof Model) {
+                if (!args.merge) {
+
+                    // передавать chain в удаление??
+                    // удаляем неиспользуемые поля
                     isChanged = this.keys().reduce(function(prev, name) {
-                        return (!args.value.hasKey(name) && self._deleteKey(name)) || prev;
-                    }, false);
-
-                    isChanged = args.value.keys().reduce(function(prev, name) {
-                        return self._setField(name, args.value.get(name), chain) || prev;
-                    }, isChanged);
-
-                } else {
-                    isChanged |= helpers.keys(args.value).reduce(function(prev, name) {
-                        return self._setField(name, args.value[name], chain) || prev;
+                        return (!args.value.hasOwnProperty(name) && self._deleteKey(name)) || prev;
                     }, false);
                 }
 
-                isChanged && this._triggerChange(chain);
+                isChanged |= helpers.keys(args.value).reduce(function(prev, name) {
+                    return self._setField(name, args.value[name], chain) || prev;
+                }, false);
             }
+
+            isChanged && this._triggerChange(chain);
 
             return isChanged;
         },
 
-        toJSON: function() {
+        toJSON: function(recursive) {
             var self = this;
+
+            recursive |= !arguments.length;
+
             return this.keys().reduce(function(prev, key) {
                 var value = self.get(key);
-                prev[key] = value && typeof value.toJSON === 'function' ? value.toJSON() : value;
+                prev[key] = (recursive && value && typeof value.toJSON === 'function') ? value.toJSON() : value;
                 return prev;
             }, {});
         },
@@ -85,18 +86,35 @@
             return false;
         },
 
-        _normalizeArgs: function(args) {
-            var result = { value: {}},
-                arg0 = args[0],
-                arg1 = args[1];
+        /**
+         * Преобразует аргументы к одному виду.
+         * Варианты вызова:
+         *  - set(data, [options])
+         *  - set(field, data, [options])
+         * @param {Array} args - массив аргументов метода set
+         * @returns {Object}
+         * @private
+         */
+        _normalizeArgs: function(arg0, arg1, arg2) {
+            var options = {},
+                result = {};
 
-            if (typeof arg0 === 'object') {
-                result.value = arg0;
-                result.chain = arg1;
-            } else {
-                result.value[arg0] = arg1;
-                result.chain = args[2];
+            switch (typeof arg0) {
+                case 'object':
+                    // вариант set(data, options)
+                    result.value = arg0 instanceof lib.model ? arg0.toJSON(false) : arg0;
+                    options = arg1 || {}
+                    break;
+                case 'string':
+                    // вариант set(field, data, options)
+                    result.value = {};
+                    result.value[arg0] = arg1;
+                    options = arg2 || {}
+                    break;
             }
+
+            result.chain = options.chain;
+            result.merge = !!options.merge;
 
             return result;
         },
@@ -129,7 +147,7 @@
             if (isChanged) {
                 if (value instanceof Model) {
                     model = data.value instanceof Model ? data.value : new Model();
-                    model.set(value, chain);
+                    model.set(value, { chain: chain });
 
                     this._setData(key, model, hash);
                     this._triggerChangeField(key, model);

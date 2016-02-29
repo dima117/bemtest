@@ -1,13 +1,28 @@
+
+.set({ x: 1 })
+.set(model)
+.set('field', 123)
+.set('field', { x: 1 }})
+.set('field', model})
+
+.get(key)
+
 .keys()
 .hasKey(key)
 .deleteKey(key)
-.get(key)
-
-.set('field', 123)
-.set({ x: 1 }})
-.set('field', { x: 1 }})
 
 .toJSON()
+
+
+можно установить значение для поля или для всей модели
+при установке можно заменять или объединять поля
+при установке генерируются события change:field и change
+
+
+установка:
+- простое значение/объект/модель
+- set/merge
+- поле/вся модель
 
 
 

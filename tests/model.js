@@ -1,13 +1,8 @@
 var lib = window.lib;
 
-describe('model', function() {
+describe.skip('model', function() {
 
     describe('установка и получение значений', function() {
-
-        it('get возвращает undefined для несуществующего ключа', function() {
-            var obj = new lib.model();
-            expect(obj.get('name')).to.equal(undefined);
-        });
 
         it('get должен возвращать то же самое, что и set', function() {
             var obj = new lib.model();
@@ -101,11 +96,7 @@ describe('model', function() {
             expect(obj.hasKey('a')).to.be.true;
         });
 
-        it('метод hasKey возвращает false для несуществующего ключа', function() {
-            var obj = new lib.model({ a: 1 });
 
-            expect(obj.hasKey('b')).to.be.false;
-        });
 
         it('метод hasKey возвращает false для удаленного ключа', function() {
             var obj = new lib.model({ a: 1, b: 2 });
@@ -517,5 +508,151 @@ describe('model', function() {
 
             expect(obj.toJSON()).to.eql({ a: { b: 1, c: 2 }});
         });
+    });
+});
+
+describe('model2', function() {
+
+    describe('состояние модели', function() {
+
+        describe('начальное состояние', function() {
+            it('get возвращает undefined для несуществующего ключа', function() {
+                var obj = new lib.model();
+                expect(obj.get('xxx')).to.equal(undefined);
+            });
+
+            it('метод keys должен возвращать пустой массив для пустой модели', function() {
+                var obj = new lib.model();
+                expect(obj.keys()).to.eql([]);
+            });
+
+            it('метод hasKey возвращает false для несуществующего ключа', function() {
+                var obj = new lib.model();
+                expect(obj.hasKey('weghr')).to.be.false;
+            });
+
+            it('метод toJSON возвращает пустой объект, если нет данных', function() {
+                var obj = new lib.model();
+                expect(obj.toJSON()).to.eql({});
+            });
+        });
+
+        describe('инициализация в конструкторе', function() {
+            describe('передаем объект', function() {
+                it('get возвращает переданное значение для существующего ключа', function() {
+                    var obj = new lib.model({ a: 12 });
+                    expect(obj.get('a')).to.equal(12);
+                });
+
+                it('get возвращает undefined для несуществующего ключа', function() {
+                    var obj = new lib.model({ b: 22 });
+                    expect(obj.get('c')).to.equal(undefined);
+                });
+
+                it('метод keys должен возвращать массив ключей', function() {
+                    var obj = new lib.model({ e: 24, d: 'test' });
+                    expect(obj.keys()).to.eql(['e', 'd']);
+                });
+
+                it('метод hasKey возвращает true для существующего ключа', function() {
+                    var obj = new lib.model({ f: 23 });
+                    expect(obj.hasKey('f')).to.be.true;
+                });
+
+                it('метод hasKey возвращает false для несуществующего ключа', function() {
+                    var obj = new lib.model({ g: 25 });
+                    expect(obj.hasKey('h')).to.be.false;
+                });
+
+                it('метод toJSON возвращает объект с переданными данными', function() {
+                    var obj = new lib.model({ h: 32, j: 'dog' });
+                    expect(obj.toJSON()).to.eql({ h: 32, j: 'dog' });
+                });
+            });
+
+            describe('передаем модель', function() {
+                it('get возвращает переданное значение для существующего ключа', function() {
+                    var data = new lib.model({ b: 13 }),
+                        obj = new lib.model(data);
+                    expect(obj.get('b')).to.equal(13);
+                });
+
+                it('get возвращает undefined для несуществующего ключа', function() {
+                    var data = new lib.model({ b: 26 }),
+                        obj = new lib.model(data);
+                    expect(obj.get('c')).to.equal(undefined);
+                });
+
+                it('метод keys должен возвращать массив ключей', function() {
+                    var data = new lib.model({ e: 24, d: 'test' }),
+                        obj = new lib.model(data);
+
+                    expect(obj.keys()).to.eql(['e', 'd']);
+                });
+
+                it('метод hasKey возвращает true для существующего ключа', function() {
+                    var data = new lib.model({ f: 23 }),
+                        obj = new lib.model(data);
+
+                    expect(obj.hasKey('f')).to.be.true;
+                });
+
+                it('метод hasKey возвращает false для несуществующего ключа', function() {
+                    var data = new lib.model({ g: 25 }),
+                        obj = new lib.model(data);
+
+                    expect(obj.hasKey('h')).to.be.false;
+                });
+
+                it('метод toJSON возвращает объект с переданными данными', function() {
+                    var data = new lib.model({ h: 32, j: 'dog' }),
+                        obj = new lib.model(data);
+
+                    expect(obj.toJSON()).to.eql({ h: 32, j: 'dog' });
+                });
+            });
+        });
+
+        describe('присваивание (замена)', function() {
+            describe('передаем модель', function() {
+                describe('состав полей', function() {
+                    it('новые поля добавляются', function() {
+                        var model = new lib.model();
+                        model.set({ k: 123 });
+                        expect(model.hasKey('k')).to.be.true;
+                    });
+
+                    it('существующие поля остаются', function() {
+                        var model = new lib.model({ l: 324 });
+                        model.set({ l: 123 });
+                        expect(model.hasKey('l')).to.be.true;
+                    });
+
+                    it('отсутствующие поля удаляются', function() {
+                        var model = new lib.model({ m: 78 });
+                        model.set({ n: 'aaa' });
+                        expect(model.hasKey('m')).to.be.false;
+                    });
+                });
+            });
+
+        });
+        //- проверка состава полей, проверка значений полей
+
+
+
+        // empty/set(obj)/set(model/set(field/value)/set(field/obj)/set(field/model))
+        // get/keys/hasKey/toJson
+
+        // рекурсивный toJSON
+        // проверить, что объект/модель раскладываются по полям, а при установке поля объект превращается в модель
+        // проверить, что при объект превращается в новую модель или присваивается в существующую
+        // модели не влияют друг на друга
+        // сортировка массива ключей в порядке присвоения
+
+    });
+
+    describe('генерация событий', function() {
+
     });
 });
